@@ -1,0 +1,39 @@
+version: 2
+
+# Weekly dependency PRs (Ale, 2026-10-28). npm dev/runtime updates are grouped
+# to cut PR noise; GitHub Actions pins (checkout, setup-node, …) are kept
+# current too. Dependabot opens the PRs; they still go through this repo's
+# local gates before merge.
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    groups:
+      # One PR for routine dev-tooling bumps (vitest, typescript, wrangler, …).
+      dev-dependencies:
+        dependency-type: development
+      # One PR for minor/patch runtime + peer bumps; majors still open singly.
+      runtime-minor-patch:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+
+    ignore:
+      # TypeScript majors are held fleet-wide (Ale, 2026-10-28): a grouped bump
+      # to the next major fails type-checks/peers across the toolchain and
+      # silently blocks the @types/node and wrangler bumps riding the same
+      # group. Take a TS major deliberately, in its own PR.
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
